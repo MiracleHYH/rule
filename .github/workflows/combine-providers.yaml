@@ -32,6 +32,10 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          draft: false
+          prerelease: false
+          name: latest
+          tag_name: latest
           files: |
             rule-providers/direct.yaml
             rule-providers/proxy.yaml
