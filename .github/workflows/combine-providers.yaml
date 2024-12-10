@@ -5,6 +5,7 @@ on:
     paths:
       - 'rule-providers/direct/**'
       - 'rule-providers/proxy/**'
+  workflow_dispatch:
 
 jobs:
   release:
