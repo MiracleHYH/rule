@@ -3,8 +3,8 @@ name: Combine Provider Files and Publish Release
 on:
   push:
     paths:
-      - 'rule-providers/direct/**'
-      - 'rule-providers/proxy/**'
+      - "rule-providers/direct/**"
+      - "rule-providers/proxy/**"
   workflow_dispatch:
 
 jobs:
@@ -20,39 +20,18 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
+          python-version: "3.x"
 
       # Step 3: 安装依赖并生成 direct.yaml 和 proxy.yaml
-      - name: Combine YAML files
+      - name: Install dependencies and generate YAML files
         run: |
           pip install pyyaml
           python combine_yaml.py rule-providers/direct rule-providers/direct.yaml
           python combine_yaml.py rule-providers/proxy rule-providers/proxy.yaml
 
-      # Step 4: 创建 Release
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: auto-update-$(date +'%Y%m%d%H%M%S')
-          release_name: Auto Update Provider Files
-          draft: false
-          prerelease: false
-
-      # Step 5: 上传 direct.yaml
-      - name: Upload direct.yaml to Release
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: rule-providers/direct.yaml
-          asset_name: direct.yaml
-          asset_content_type: text/yaml
-
-      # Step 6: 上传 proxy.yaml
-      - name: Upload proxy.yaml to Release
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: rule-providers/proxy.yaml
-          asset_name: proxy.yaml
-          asset_content_type: text/yaml
+          files: |
+            rule-providers/direct.yaml
+            rule-providers/proxy.yaml
