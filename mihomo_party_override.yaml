@@ -1,4 +1,4 @@
-+rule-providers:
+rule-providers:
   custom_direct:
     type: http
     interval: 86400
