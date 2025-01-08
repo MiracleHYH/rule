@@ -2,7 +2,7 @@ rule-providers:
   custom_direct:
     type: http
     interval: 86400
-    behaver: classical
+    behavior: classical
     format: yaml
     url: https://ghproxy.cc/https://github.com/MiracleHYH/rule/releases/download/latest/direct.yaml
 
