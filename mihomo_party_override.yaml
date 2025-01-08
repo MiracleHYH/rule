@@ -1,0 +1,10 @@
++rule-providers:
+  custom_direct:
+    type: http
+    interval: 86400
+    behaver: classical
+    format: yaml
+    url: https://ghproxy.cc/https://github.com/MiracleHYH/rule/releases/download/latest/direct.yaml
+
++rules:
+  - "RULE-SET,custom_direct,DIRECT"
