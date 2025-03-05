@@ -1,0 +1,106 @@
+# mihomo (Clash Meta) 配置模板 / mihomo (Clash Meta) Configuration Template
+# 版本 Version: 1.0
+# 本配置文件用于 mihomo（Clash Meta），请根据实际情况修改参数。
+# This configuration file is for mihomo (Clash Meta). Please modify as needed.
+
+# 全局设置 / Global Settings
+mixed-port: 24680                # 混合代理端口 / Mixed proxy port
+port: 24681                      # HTTP 代理端口 / HTTP proxy port
+socks-port: 24682                # SOCKS 代理端口 / SOCKS proxy port
+external-controller: "0.0.0.0:13579"  # 外部控制端口 / External controller port
+secret: "123456"                 # 密钥 / Secret
+allow-lan: false                 # 允许局域网连接 / Allow LAN connections
+# bind-address: "*"
+# authentication:
+#   - "admin:admin"               # 用户名:密码 / Username:Password
+log-level: info                 # 日志级别 (info/debug/warn) / Log level
+ipv6: false                     # 是否启用 IPv6 / Enable IPv6
+mode: rule                      # 工作模式 (Rule/Global/Script) / Mode (Rule/Global/Script)
+global-client-fingerprint: chrome
+geodata-mode: false
+geodata-loader: standard
+geo-auto-update: true
+geo-update-interval: 24
+geox-url:
+  geoip: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat"
+  geosite: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat"
+  mmdb: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/country.mmdb"
+  asn: "https://github.com/xishang0128/geoip/releases/download/latest/GeoLite2-ASN.mmdb"
+global-ua: clash.meta
+etag-support: true
+
+
+# TUN 模式设置 / TUN Mode Settings
+tun:
+  enable: true                   # 启用 TUN 模式 / Enable TUN mode
+  stack: mixed                   # 混合堆栈模式：自动选择系统与其他堆栈的最佳组合 / Use mixed network stack mode (dynamically chooses between system and alternative stacks)
+  auto-route: true               # 自动添加路由规则，将目标流量转发到 TUN 接口 / Automatically add routing rules for traffic redirection
+  auto-redirect: true            # 自动拦截并重定向 TCP/UDP 流量，实现透明代理 / Automatically intercept and redirect TCP/UDP traffic (transparent proxy)
+  auto-detect-interface: true    # 自动检测最佳网络接口 / Automatically detect the optimal network interface for TUN
+  dns-hijack:
+    - "any:53"                   # 劫持所有 UDP 53 端口的 DNS 流量 / Hijack all UDP DNS traffic on port 53
+    - "tcp://any:53"             # 劫持所有 TCP 53 端口的 DNS 流量 / Hijack all TCP DNS traffic on port 53
+  # device: utun0                # 可选：指定 TUN 设备名称（例如 macOS 下常用 utun0）/ Optionally specify the TUN device name (e.g., "utun0" on macOS)
+  mtu: 9000                      # 设置最大传输单元为9000，适合高性能或支持 Jumbo Frames 的网络环境 / Set MTU to 9000 (suitable for high-performance networks supporting Jumbo Frames)
+  strict-route: true             # 严格路由模式：确保只有匹配路由规则的流量才经过 TUN 接口 / Strict routing: Only traffic matching defined routes is forwarded through the TUN interface
+  gso: true                      # 启用 TCP GSO（Generic Segmentation Offload），可提升数据包处理性能 / Enable TCP Generic Segmentation Offload (GSO) to improve packet processing efficiency
+  gso-max-size: 65536            # 设置 GSO 最大分段大小 / Set maximum size for GSO segmentation (in bytes)
+
+
+# DNS 设置 / DNS Settings
+dns:
+  enable: true
+  prefer-h3: false
+  use-hosts: true
+  use-system-hosts: true
+  respect-rules: true
+  listen: "0.0.0.0:24653"         # 监听地址及端口 / Listening address and port
+  ipv6: fasle                    # 是否启用 IPv6 / Enable IPv6
+  enhanced-mode: fake-ip     # DNS 模式：redir-host 或 fake-ip / DNS mode: redir-host or fake-ip
+  fake-ip-range: "28.0.0.1/8"     # Fake IP 范围 / Fake IP range
+  fake-ip-filter-mode: blacklist
+  fake-ip-filter:
+    - "*.lan"
+    - "*.local"
+    - geosite:private
+    - geosite:cn
+  default-nameserver:           # 默认 DNS 服务器 / Default nameservers
+    - "223.5.5.5"
+    - "119.29.29.29"
+  nameserver:                   # 备用 DNS 服务器 / Alternate nameservers
+    - "tls://8.8.8.8#dns"
+    - "tls://1.1.1.1#dns"
+
+# 订阅配置 (Proxy Providers) / Subscription Settings
+proxy-providers:
+  mySubscription:               # 订阅名称 / Subscription name (请替换为实际名称)
+    type: http
+    url: "https://example.com/subscribe?token=your_token_here"  
+                                # 订阅链接 (Replace with your actual subscription URL)
+    interval: 86400             # 自动更新间隔，单位秒 / Update interval (in seconds)
+    health-check:               # 节点连通性检测 / Health check settings
+      enable: true
+      url: "https://www.gstatic.com/generate_204"
+      interval: 300
+
+# 节点配置 (Proxies) / Node Settings
+proxies:
+  - name: "DIRECT"              # 直连节点 / Direct connection
+    type: direct
+    udp: true
+
+# 代理组配置 (Proxy Groups) / Group Settings
+proxy-groups:
+  - name: "Auto Select"         # 自动选择组 / Auto Select group
+    type: url-test              # 根据 URL 测试延迟 / Test latency via URL
+    url: "http://www.gstatic.com/generate_204"
+    interval: 300
+    tolerance: 50
+    proxies:
+      - "DIRECT"
+      - "mySubscription"       # 此处从订阅中获取节点 / Nodes from subscription
+
+# 规则配置 (Rules) / Routing Rules
+rules:
+  - GEOIP,CN,DIRECT            # 对中国大陆 IP 直连 / Direct for CN IPs
+  - MATCH,Auto Select          # 其它流量使用“自动选择”策略 / All other traffic use Auto Select group
